@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-07-15T03:46:30.828Z</updated>
+  <updated>2018-07-15T03:51:40.459Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>noVNC实现远程访问Docker容器桌面</title>
+    <link href="http://yoursite.com/2018/07/15/noVNC-Docker/"/>
+    <id>http://yoursite.com/2018/07/15/noVNC-Docker/</id>
+    <published>2018-07-15T03:48:43.768Z</published>
+    <updated>2018-07-15T03:51:40.459Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="一、实验环境"><a href="#一、实验环境" class="headerlink" title="一、实验环境"></a>一、实验环境</h2><p>主机：Ubuntu16.04<br>目标机：docker容器<br><strong>说明：</strong>在主机Ubuntu16.04中安装docker，并虚拟出一台Ubuntu容器，将该容器作为要远程访问的目标机</p><h2 id="二、实现过程"><a href="#二、实现过程" class="headerlink" title="二、实现过程"></a>二、实现过程</h2><p>1.在docker容器中安装vnc4server，并启动vnc4server服务：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">apt-get update</span><br><span class="line"></span><br><span class="line">apt-get install vnc4server</span><br><span class="line"></span><br><span class="line">apt-get install net-tools  //安装网络工具，用于查看容器的IP地址</span><br><span class="line"></span><br><span class="line">vnc4server  //这里会提示输入密码，要记住</span><br></pre></td></tr></table></figure><p>红框可以看出启动2号桌面服务：<br><img src="http://img.blog.csdn.net/20170522210516561?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="红框可以看出启动2号桌面服务"></p><p>2.在主机Ubuntu（或centOS7）中安装并配置noVNC：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install git</span><br><span class="line">git clone https://github.com/kanaka/noVNC</span><br><span class="line">cd noVNC</span><br><span class="line"></span><br><span class="line">./utils/launch.sh --vnc 172.17.0.2:5901  </span><br><span class="line">//172.17.0.2：为目标机docker容器的IP地址。      </span><br><span class="line">//5901：为目标机启动vnc4server时启动的1号服务</span><br><span class="line"></span><br><span class="line">vi vnc_token  //新建一个文件，写入要访问的目标机的相关内容，格式为：           目标机名称: IP:端口号</span><br><span class="line"></span><br><span class="line">utils/websockify/websockify.py --web=./ --target-config vnc_tokens 6080    //运行上一步新建的内容。  **注意：运行该命令的终端不能关闭**</span><br></pre></td></tr></table></figure></p><p>执行上述最后一条命令后结果（要切换到noVNC目录下执行）：<br><img src="http://img.blog.csdn.net/20170522210642779?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="运行结果"></p><p>3.测试网站：<br><a href="http://192.168.43.227:6080/vnc_auto.html?websockify/?token=host1" target="_blank" rel="noopener">http://192.168.43.227:6080/vnc_auto.html?websockify/?token=host1</a>  </p><p>说明：192.168.43.227：为主机Ubuntu的IP地址<br>            host1：为vnc_token文件中写入的目标机名称<br>测试结果：<br><img src="http://img.blog.csdn.net/20170522210843673?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="测试结果"></p><p><strong>vnc_tokens文件中内容格式：</strong><br><img src="http://img.blog.csdn.net/20170522210943220?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="vnc_tokens文件"></p><p>4.后续需求说明<br>若需要去掉用户登录后输入密码的界面，需要修改以下部分：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vnc_auto.html文件中:</span><br><span class="line"></span><br><span class="line">form.innerHTML += &apos;&lt;input type=password size=10 id=&quot;password_input&quot; class=&quot;noVNC_status&quot; value=&quot;123456&quot;&gt;&apos;;</span><br><span class="line">form.onsubmit = true;</span><br></pre></td></tr></table></figure><p>红框内为修改部分：<br><img src="http://img.blog.csdn.net/20170522211347066?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="修改"></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">core/rbf.js文件中:</span><br><span class="line"></span><br><span class="line">this._rfb_password=&apos;123456&apos;;   //123456代表上面启动vnc4server时输入的密码</span><br></pre></td></tr></table></figure><p>红框内为修改部分：<br><img src="http://img.blog.csdn.net/20170522211450992?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="修改"></p><blockquote><p>####说明：所有源码已上传到笔者<strong><a href="https://github.com/amateur-RD" target="_blank" rel="noopener">GitHub</a></strong>上，欢迎follow、star。感谢！！！</p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;一、实验环境&quot;&gt;&lt;a href=&quot;#一、实验环境&quot; class=&quot;headerlink&quot; title=&quot;一、实验环境&quot;&gt;&lt;/a&gt;一、实验环境&lt;/h2&gt;&lt;p&gt;主机：Ubuntu16.04&lt;br&gt;目标机：docker容器&lt;br&gt;&lt;strong&gt;说明：&lt;/strong&gt;
+      
+    
+    </summary>
+    
+    
+      <category term="Docker, noVNC, 远程访问桌面, ubuntu, vncServer" scheme="http://yoursite.com/tags/Docker-noVNC-%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE%E6%A1%8C%E9%9D%A2-ubuntu-vncServer/"/>
+    
+  </entry>
   
   <entry>
     <title>Hello World</title>

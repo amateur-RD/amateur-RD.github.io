@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://amateur-rd.github.io/2018/07/17/hadoop-demo/</loc>
+    
+    <lastmod>2018-07-17T14:14:17.926Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://amateur-rd.github.io/2018/07/16/spark-build/</loc>
     
     <lastmod>2018-07-17T13:57:48.443Z</lastmod>

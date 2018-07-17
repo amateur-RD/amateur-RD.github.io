@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://amateur-rd.github.io/"/>
-  <updated>2018-07-17T13:57:48.443Z</updated>
+  <updated>2018-07-17T14:14:17.926Z</updated>
   <id>https://amateur-rd.github.io/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>hadoop案例测试——pi值、wordcount函数，hadoop不支持本地库问题</title>
+    <link href="https://amateur-rd.github.io/2018/07/17/hadoop-demo/"/>
+    <id>https://amateur-rd.github.io/2018/07/17/hadoop-demo/</id>
+    <published>2018-07-17T14:08:06.951Z</published>
+    <updated>2018-07-17T14:14:17.926Z</updated>
+    
+    <content type="html"><![CDATA[<p>前言：本文案例测试所需环境都是在前面几篇blog的基础上进行的，具体内容请查看：<br><a href="http://blog.csdn.net/u012829611/article/details/77678609" target="_blank" rel="noopener">http://blog.csdn.net/u012829611/article/details/77678609</a><br><a href="http://blog.csdn.net/u012829611/article/details/77651855" target="_blank" rel="noopener">http://blog.csdn.net/u012829611/article/details/77651855</a></p><h2 id="1-使用hadoop估算pi的值"><a href="#1-使用hadoop估算pi的值" class="headerlink" title="1.使用hadoop估算pi的值"></a>1.使用hadoop估算pi的值</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[hadoop@localhost hadoop-2.7.3]# yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.3.jar pi 5 10</span><br></pre></td></tr></table></figure><p><strong>注</strong>：命令中，“5”表示map进行5次，“10”表示每次map投掷10次（相当于扔飞镖10次计算出pi的值）</p><p><img src="http://img.blog.csdn.net/20170829155150291?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p><p>最终计算结果：</p><p><img src="http://img.blog.csdn.net/20170829155158660?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p><h2 id="2-使用mapreduce中wordcount函数计算-input目录下test文件中单词出现的次数，结果输出到-output目录下"><a href="#2-使用mapreduce中wordcount函数计算-input目录下test文件中单词出现的次数，结果输出到-output目录下" class="headerlink" title="2.使用mapreduce中wordcount函数计算/input目录下test文件中单词出现的次数，结果输出到/output目录下"></a>2.使用mapreduce中wordcount函数计算/input目录下test文件中单词出现的次数，结果输出到/output目录下</h2><p>//hdfs上创建文件夹input</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[hadoop@localhost hadoop-2.7.3]# hdfs dfs -mkdir /input</span><br><span class="line">[hadoop@localhost hadoop-2.7.3]# hdfs dfs -ls /</span><br></pre></td></tr></table></figure><p>//新建test文件，输入一些字符串</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[hadoop@localhost hadoop-2.7.3]# vim test</span><br></pre></td></tr></table></figure><p>//将test文件put到hdfs的input目录下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[hadoop@localhost hadoop-2.7.3]# hdfs dfs -put test /input</span><br></pre></td></tr></table></figure><p>//执行命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[hadoop@localhost hadoop-2.7.3]# yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.3.jar wordcount /input/test /output</span><br></pre></td></tr></table></figure><p><img src="http://img.blog.csdn.net/20170829155358720?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p><p>//查看output目录下的文件</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[hadoop@localhost hadoop-2.7.3]# hdfs dfs -ls /output</span><br></pre></td></tr></table></figure><p><img src="http://img.blog.csdn.net/20170829155515758?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p><p>//查看统计结果</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[hadoop@localhost hadoop-2.7.3]# hdfs dfs -cat /output/part-r-00000</span><br></pre></td></tr></table></figure><p><img src="http://img.blog.csdn.net/20170829155537720?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxMjgyOTYxMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p><p><strong>附</strong>：<br>①hdfs dfs -rm -r /output                     //删除hdfs上的output文件夹</p><hr><h2 id="关于hadoop不支持本地库问题"><a href="#关于hadoop不支持本地库问题" class="headerlink" title="关于hadoop不支持本地库问题"></a>关于hadoop不支持本地库问题</h2><p>问题描述：hadoop安装完后，使用”hadoop checknative”命令查看是否支持本地库时，发现不支持hadoop、zlib、snappy等一些本地库。</p><p>解决方法：执行以下命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[hadoop@localhost bin]# export HADOOP_OPTS=&quot;-Djava.library.path=./../lib/native/&quot;</span><br></pre></td></tr></table></figure><p>参考文档：<br><a href="http://blog.csdn.net/ligt0610/article/details/47757013" target="_blank" rel="noopener">http://blog.csdn.net/ligt0610/article/details/47757013</a><br><a href="https://zhidao.baidu.com/question/1766673293716469500.html" target="_blank" rel="noopener">https://zhidao.baidu.com/question/1766673293716469500.html</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;前言：本文案例测试所需环境都是在前面几篇blog的基础上进行的，具体内容请查看：&lt;br&gt;&lt;a href=&quot;http://blog.csdn.net/u012829611/article/details/77678609&quot; target=&quot;_blank&quot; rel=&quot;noope
+      
+    
+    </summary>
+    
+      <category term="BigData" scheme="https://amateur-rd.github.io/categories/BigData/"/>
+    
+    
+      <category term="Hadoop" scheme="https://amateur-rd.github.io/tags/Hadoop/"/>
+    
+      <category term="MapReduce" scheme="https://amateur-rd.github.io/tags/MapReduce/"/>
+    
+      <category term="wordcount" scheme="https://amateur-rd.github.io/tags/wordcount/"/>
+    
+  </entry>
   
   <entry>
     <title>编译spark源码的方法，及编译、案例测试问题总结</title>
